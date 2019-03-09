@@ -6,17 +6,6 @@ if(!isset($_SESSION['login'])){
 }
 
 ?>
-
-<?php
-    $con = mysqli_connect("localhost","root","","pulari_db");
-    $res = mysqli_query($con, "SELECT SUM(amount) FROM deposit");
-    $deposit = mysqli_fetch_array($res);
-    $res1 = mysqli_query($con, "SELECT SUM(loan_amount) FROM loan");
-    $loan = mysqli_fetch_array($res1);
-    $req = mysqli_fetch_array(mysqli_query($con,'SELECT COUNT(*) FROM request WHERE status="PENDING"'));
-    if($loan[0] == null) $loan[0]=0;
-    $balance = $deposit[0] - $loan[0];
-?>
 <!DOCTYPE html>
 <html>
 <title>Secretary Dashboard</title>
@@ -24,17 +13,42 @@ if(!isset($_SESSION['login'])){
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="css/style.css">
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+
+    <!-- Plugin CSS -->
+    <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/creative.min.css" rel="stylesheet">    
+    
+    
 <style>
+    body{
+        height: auto;
+    }
 html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+    .top-nav-btn{
+        color: #fff;
+    }
 </style>
 <body class="w3-light-grey">
 
 <!-- Top container -->
 <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
   <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
-  <a href="index.php"><span class="w3-bar-item w3-left">PULARI</span></a>
-    <a class="top-nav-btn" href="logout.php"><span class="w3-bar-item w3-right">Logout</span></a>
+  <a href="logout.php"><span class="w3-bar-item w3-left">PULARI</span></a>
+  <a class="top-nav-btn" href="logout.php"><span class="w3-bar-item w3-right">Logout</span></a>
+  <a class="top-nav-btn" id="uptBtn" href="#"><span class="w3-bar-item w3-right">Update Subscription</span></a>
+  <a class="top-nav-btn" id="viewBtn" href="#"><span class="w3-bar-item w3-right">View Subscription</span></a>
+  <a class="top-nav-btn" id="addBtn" href="#"><span class="w3-bar-item w3-right">Add Subscription</span></a>
 </div>
 
 <!-- Sidebar/menu -->
@@ -45,7 +59,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </div>
     <div class="w3-col s8 w3-bar">
       <span>Welcome, <strong><?php echo $_SESSION['login']?></strong></span><br>
-      <a href="profile.php" id="profileBtn" class="w3-bar-item w3-button"><i class="fa fa-user"></i></a>
+      <a href="#" class="w3-bar-item w3-button"><i class="fa fa-user"></i></a>
       <a href="#" class="w3-bar-item w3-button"><i class="fa fa-cog"></i></a>
     </div>
   </div>
@@ -55,10 +69,10 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   </div>
   <div class="w3-bar-block">
     <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
-    <a href="users.php" class="w3-bar-item w3-button w3-padding"><i class="fa fa-user-circle fa-fw"></i>  Users</a>
-    <a href="deposit.php" class="w3-bar-item w3-button w3-padding"><i class="fa fa-rupee fa-fw"></i>  Deposit</a>
+    <a  href="secretary_dashboard.php" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-users fa-fw"></i>  Overview</a> 
+    <a href="users.php" class="w3-bar-item w3-button w3-padding"><i class="fa fa-rupee fa-fw"></i>  Users</a>
+    <a href="deposit.php" class="w3-bar-item w3-button w3-padding"><i class="fa fa-money fa-fw"></i>  Deposit</a>
     <a href="loan.php" class="w3-bar-item w3-button w3-padding"><i class="fa fa-money fa-fw"></i>  Loan</a>
-    <a href="subscription.php" class="w3-bar-item w3-button w3-padding"><i class="fa fa-money fa-fw"></i> Subscription</a>
   </div>
 </nav>
 
@@ -71,55 +85,18 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 
   <!-- Header -->
   <header class="w3-container" style="padding-top:22px">
-    <h5><b><i class="fa fa-dashboard"></i> OVERVIEW</b></h5>
+    <h5><b><i class="fa fa-dashboard"></i> SUBSCRIPTION</b></h5>
   </header>
+    
+    <div class="inner-content">
+        <iframe id="innerSrc" frameborder="0" src="add_sub.php" width="100%" height="550px"></iframe>
+    </div>
 
-  <div class="w3-row-padding w3-margin-bottom">
-    <div class="w3-quarter">
-      <div class="w3-container w3-red w3-padding-16">
-        <div class="w3-left"><i class="fa fa-comment w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3><?php echo $req[0]; ?></h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Requests</h4>
-      </div>
-    </div>
-    <div class="w3-quarter">
-      <div class="w3-container w3-blue w3-padding-16">
-        <div class="w3-left"><i class="fa fa-eye w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>Rs: <?php echo $deposit[0]; ?>/-</h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Deposit</h4>
-      </div>
-    </div>
-    <div class="w3-quarter">
-      <div class="w3-container w3-teal w3-padding-16">
-        <div class="w3-left"><i class="fa fa-share-alt w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>Rs: <?php echo $loan[0]; ?>/-</h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Loans</h4>
-      </div>
-    </div>
-    <div class="w3-quarter">
-      <div class="w3-container w3-orange w3-text-white w3-padding-16">
-        <div class="w3-left"><i class="fa fa-users w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>Rs: <?php echo $balance; ?>/-</h3>
-        </div>
-        <div class="w3-clear"></div>
-        <h4>Balance</h4>
-      </div>
-    </div>
-  </div>
 
   <!-- End page content -->
 </div>
 
+ 
 <script src="vendor/jquery/jquery.min.js"></script>   
 <script>
     $(document).ready(function(){
@@ -127,25 +104,19 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
         $('.top-nav-btn').click(function(){
             var val = $(this).attr('id');
             switch(val){
-                case 'profileBtn':
-                    $('#innerSrc').attr('src','add_loan.html');
-                    break;
-                case 'delBtn':
-                    $('#innerSrc').attr('src','request_form.html');
+                case 'addBtn':
+                    $('#innerSrc').attr('src','add_sub.php');
                     break;
                 case 'uptBtn':
-                    $('#innerSrc').attr('src','update_loan.html');
+                    $('#innerSrc').attr('src','update_sub.php');
                     break;
                 case 'viewBtn':
-                    $('#innerSrc').attr('src','view_loan.php');
+                    $('#innerSrc').attr('src','view_sub.php');
                     break;
             }
         });
         
     });
-    
-    
-<script>
 // Get the Sidebar
 var mySidebar = document.getElementById("mySidebar");
 
@@ -168,6 +139,8 @@ function w3_close() {
     mySidebar.style.display = "none";
     overlayBg.style.display = "none";
 }
+    
+    
     
 
 
